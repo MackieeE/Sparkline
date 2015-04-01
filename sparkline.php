@@ -23,6 +23,7 @@ function hexToRgb($hex)
 $size = isset($_GET['size']) ? str_replace('x', '', $_GET['size']) != '' ? $_GET['size'] : '80x20' : '80x20';
 $back = isset($_GET['back']) ? isHex($_GET['back']) ? $_GET['back'] : 'ffffff' : 'ffffff';
 $line = isset($_GET['line']) ? isHex($_GET['line']) ? $_GET['line'] : '1388db' : '1388db';
+$negc = isset($_GET['negative']) ? isHex($_GET['negative']) ? $_GET['negative'] : '570000' : '570000';
 $fill = isset($_GET['fill']) ? isHex($_GET['fill']) ? $_GET['fill'] : 'e6f2fa' : 'e6f2fa';
 $data = isset($_GET['data']) ? explode(',', $_GET['data']) : array();
 
@@ -55,12 +56,22 @@ if (isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
     }
 }
 
+/** Background Color **/
 $im = imagecreatetruecolor($w, $h);
 list($r, $g, $b) = hexToRgb($back);
+
+/** Line Color **/
 $bg = imagecolorallocate($im, $r, $g, $b);
 list($r, $g, $b) = hexToRgb($line);
+
+/** Negative Line Colour **/
 $fg = imagecolorallocate($im, $r, $g, $b);
+list($r, $g, $b) = hexToRgb($negc);
+
+/** Fill Colour **/
+$ng = imagecolorallocate($im, $r, $g, $b);
 list($r, $g, $b) = hexToRgb($fill);
+
 $lg = imagecolorallocate($im, $r, $g, $b);
 imagefill($im, 0, 0, $bg);
 
@@ -89,7 +100,7 @@ imagefilledpolygon($im, $poly, $count + 2, $lg);
 
 foreach ($line as $k => $v) {
     list($x1, $y1, $x2, $y2) = $v;
-    imageline($im, $x1, $y1, $x2, $y2, $fg);
+    imageline($im, $x1, $y1, $x2, $y2, ( $y1 < $y2 ? $ng : $fg ));
 }
 
 $om = imagecreatetruecolor($w / $s, $h / $s);
