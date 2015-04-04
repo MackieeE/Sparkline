@@ -49,7 +49,7 @@ class phpSparklines {
      * E.g. 2,60,30,10,30
      * @var array
      */
-    private $data = array( 1, 40, 30 );
+    private $data = array();
 
     /**
      * @var string
@@ -81,7 +81,6 @@ class phpSparklines {
    public function __construct( $options = array() ) {
         if ( !extension_loaded( 'gd' ))
             die('GD extension is not installed, please check your PHP Configuration.');
-            
         $this->setOptions();
     }
 
@@ -159,8 +158,9 @@ class phpSparklines {
      * @return bool
      */
     private function isCached() {
-
+    
         $salt = 'v1.5.0';
+        $salt .= join( '*', $this->data );
         $this->hash = md5( $salt . $_SERVER['QUERY_STRING'] );
 
         if (isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
