@@ -56,16 +56,16 @@ class phpSparklines {
      */
     private $hash;
 
-	/**
-	 *	@var string
-	**/
-	private $fileType = "image/png"; 
-	
-	/**
-	 *	@var string
-	**/
-	private $fileExtension = ".png";	
-				
+    /**
+     * @var string
+    */
+    private $fileType = "image/png"; 
+
+    /**
+     * @var string
+    **/
+    private $fileExtension = ".png";	
+
     /*
      */
     private $sparkline;
@@ -81,6 +81,7 @@ class phpSparklines {
    public function __construct( $options = array() ) {
         if ( !extension_loaded( 'gd' ))
             die('GD extension is not installed, please check your PHP Configuration.');
+            
         $this->setOptions();
     }
 
@@ -89,7 +90,7 @@ class phpSparklines {
      * @return void
      */
     public function setOptions( $userOptions = array() ){
-		
+
         //Set Size.
         if( isset( $_GET['size'] ) && str_replace( 'x', '', $_GET['size'] ) != '' )
             $this->imageSize = $_GET['size'];
@@ -128,30 +129,29 @@ class phpSparklines {
             $this->data = $userOptions["data"];
     }
     
-	/**
-	 *	Sets the extension of the image to be printed.
-	 *  @return self
-	**/
+    /**
+    * Sets the extension of the image to be printed.
+    * @return self
+    **/
     public function setExtension( $fileType = '.png' ) {
-		$file_extension = strtolower(substr( strrchr( $fileType, "." ), 1 ));
+        $file_extension = strtolower(substr( strrchr( $fileType, "." ), 1 ));
+            switch( $file_extension ) {
+            case "gif": 
+                $this->fileType = "image/gif"; 
+                $this->fileExtension = ".gif";
+            break;
+            case "png": 
+                $this->fileType = "image/png"; 
+                $this->fileExtension = ".png";	
+            break;
+            case "jpeg":
+            case "jpg": 
+                $this->fileType = "image/jpeg"; 
+                $this->fileExtension = ".jpg";	
+            break;
+        }
 
-		switch( $file_extension ) {
-			case "gif": 
-				$this->fileType = "image/gif"; 
-				$this->fileExtension = ".gif";
-			break;
-			case "png": 
-				$this->fileType = "image/png"; 
-				$this->fileExtension = ".png";	
-			break;
-			case "jpeg":
-			case "jpg": 
-				$this->fileType = "image/jpeg"; 
-				$this->fileExtension = ".jpg";	
-			break;
-		}
-		
-		return $this;
+        return $this;
     }
     
     /**
@@ -202,69 +202,69 @@ class phpSparklines {
 
         if ( !$this->isCached() ) { 
 
-			list($w, $h) = explode( 'x', $this->imageSize );
-			$w = floor( max( 50, min( 800, $w )));
-			$h = !strstr( $this->imageSize, 'x') ? $w : floor( max( 20, min( 800, $h )));
-			$t = 1.75;
-			$s = 4;
+            list($w, $h) = explode( 'x', $this->imageSize );
+            $w = floor( max( 50, min( 800, $w )));
+            $h = !strstr( $this->imageSize, 'x') ? $w : floor( max( 20, min( 800, $h )));
+            $t = 1.75;
+            $s = 4;
 
-			$w *= $s;
-			$h *= $s;
-			$t *= $s;
+            $w *= $s;
+            $h *= $s;
+            $t *= $s;
 
-			$data = ( count( $this->data ) < 2 ) ? array_fill( 0, 2, $this->data[0] ) : $this->data;
-			$count = count( $data );
-			$step = $w / ( $count - 1 );
-			$max = max( $data );
+            $data = ( count( $this->data ) < 2 ) ? array_fill( 0, 2, $this->data[0] ) : $this->data;
+            $count = count( $data );
+            $step = $w / ( $count - 1 );
+            $max = max( $data );
 
-			$this->sparkline = imagecreatetruecolor($w, $h);
-			list($r, $g, $b) = $this->hexToRgb($this->backgroundColor);
+            $this->sparkline = imagecreatetruecolor($w, $h);
+            list($r, $g, $b) = $this->hexToRgb($this->backgroundColor);
 
-			$bg = imagecolorallocate($this->sparkline, $r, $g, $b);
-			list($r, $g, $b) = $this->hexToRgb($this->lineColor);
+            $bg = imagecolorallocate($this->sparkline, $r, $g, $b);
+            list($r, $g, $b) = $this->hexToRgb($this->lineColor);
 
-			$fg = imagecolorallocate($this->sparkline, $r, $g, $b);
-			list($r, $g, $b) = $this->hexToRgb($this->negativeLineColor);
+            $fg = imagecolorallocate($this->sparkline, $r, $g, $b);
+            list($r, $g, $b) = $this->hexToRgb($this->negativeLineColor);
 
-			$ng = imagecolorallocate($this->sparkline, $r, $g, $b);
-			list($r, $g, $b) = $this->hexToRgb($this->fillColor);
+            $ng = imagecolorallocate($this->sparkline, $r, $g, $b);
+            list($r, $g, $b) = $this->hexToRgb($this->fillColor);
 
-			$lg = imagecolorallocate($this->sparkline, $r, $g, $b);
-			imagefill($this->sparkline, 0, 0, $bg);
-			imagesetthickness($this->sparkline, $t);
+            $lg = imagecolorallocate($this->sparkline, $r, $g, $b);
+            imagefill($this->sparkline, 0, 0, $bg);
+            imagesetthickness($this->sparkline, $t);
 
-			foreach ($data as $k => $v) {
-				$v = $v > 0 ? round($v / $max * $h) : 0;
-				$data[$k] = max($s, min($v, $h - $s));
-			}
+            foreach ($data as $k => $v) {
+                $v = $v > 0 ? round($v / $max * $h) : 0;
+                $data[$k] = max($s, min($v, $h - $s));
+            }
 
-			$x1 = 0;
-			$y1 = $h - $data[0];
-			$line = array();
-			$poly = array(0, $h + 50, $x1, $y1);
-			for ($i = 1; $i < $count; $i++) {
-				$x2 = $x1 + $step;
-				$y2 = $h - $data[$i];
-				array_push($line, array($x1, $y1, $x2, $y2));
-				array_push($poly, $x2, $y2);
-				$x1 = $x2;
-				$y1 = $y2;
-			}
+            $x1 = 0;
+            $y1 = $h - $data[0];
+            $line = array();
+            $poly = array(0, $h + 50, $x1, $y1);
+            for ($i = 1; $i < $count; $i++) {
+                $x2 = $x1 + $step;
+                $y2 = $h - $data[$i];
+                array_push($line, array($x1, $y1, $x2, $y2));
+                array_push($poly, $x2, $y2);
+                $x1 = $x2;
+                $y1 = $y2;
+            }
 
-			array_push($poly, $x2, $h + 50);
+            array_push($poly, $x2, $h + 50);
 
-			imagefilledpolygon( $this->sparkline, $poly, $count + 2, $lg );
+            imagefilledpolygon( $this->sparkline, $poly, $count + 2, $lg );
 
-			foreach ($line as $k => $v) {
-				list($x1, $y1, $x2, $y2) = $v;
-				imageline($this->sparkline, $x1, $y1, $x2, $y2, ( $y1 < $y2 ? $ng : $fg ));
-			}
+            foreach ($line as $k => $v) {
+                list($x1, $y1, $x2, $y2) = $v;
+                imageline($this->sparkline, $x1, $y1, $x2, $y2, ( $y1 < $y2 ? $ng : $fg ));
+            }
 
-			$this->image = imagecreatetruecolor( $w / $s, $h / $s );
-			imagecopyresampled( $this->image, $this->sparkline, 0, 0, 0, 0, $w / $s, $h / $s, $w, $h);
-			imagedestroy( $this->sparkline );
-			
-		}
+            $this->image = imagecreatetruecolor( $w / $s, $h / $s );
+            imagecopyresampled( $this->image, $this->sparkline, 0, 0, 0, 0, $w / $s, $h / $s, $w, $h);
+            imagedestroy( $this->sparkline );
+    
+        }
 
         return $this;
     }
@@ -280,19 +280,19 @@ class phpSparklines {
         header('Cache-Control: max-age=604800, must-revalidate' );
         header('Expires: ' . gmdate('D, d M Y H:i:s T', strtotime('+7 days')));
 
-		switch( $this->fileType ) {       
-			case "image/png":
-				imagepng( $this->image );
-			break;
-			case "image/jpeg":
-			case "image/jpg":
-				imagejpeg( $this->image );
-			break;
-			case "image/gif":
-				imagegif( $this->image );
-			break;
-		}
-		
+        switch( $this->fileType ) {       
+            case "image/png":
+                imagepng( $this->image );
+            break;
+            case "image/jpeg":
+            case "image/jpg":
+                imagejpeg( $this->image );
+            break;
+            case "image/gif":
+                imagegif( $this->image );
+            break;
+        }
+    
         imagedestroy( $this->image );
     }
     
